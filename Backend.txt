@@ -1,0 +1,38 @@
+from flask import Flask, render_template, request, redirect, url_for, session
+
+app = Flask(_name_)
+app.secret_key = 'your_secret_key'  # Change this to a secure random key in production
+
+# Placeholder for user roles
+ROLES = {
+    'patient': {'password': 'patientpass'},
+    'doctor': {'password': 'doctorpass'},
+    'admin': {'password': 'adminpass'}
+}
+
+@app.route('/')
+def home():
+    if 'user' in session:
+        user_role = session['user']['role']
+        return render_template('dashboard.html', user_role=user_role)
+    else:
+        return render_template('login.html')
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    if username in ROLES and ROLES[username]['password'] == password:
+        session['user'] = {'username': username, 'role': username}
+        return redirect(url_for('home'))
+    else:
+        return 'Login failed. Please check your username and password.'
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('home'))
+
+if _name_ == '_main_':
+    app.run(debug=True)
